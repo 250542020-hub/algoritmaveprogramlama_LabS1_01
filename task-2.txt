@@ -1,4 +1,84 @@
-Öğrenci No:
-AD-SOYAD:
+Öğrenci No:250542020  
+AD-SOYAD:Ahmet Enes Altun
 
 Lütfen seçtiğiniz algoritmaya ait çözümü ve diğer isterleri aşağıya ekleyiniz:
+ALGORİTMA OlasilikliHamleSec(tahta, benim='X', rakip='O', eps=0.10, p_kir=0.60)
+    // eps: küçük bir olasılıkla (ε-greedy) en iyi olmayan ama güvenli bir hamle seçerek tahmin edilebilirliği azalt
+    // p_kir: ayna-stratejiyi algılarsak simetriyi kırma olasılığı
+
+    // 0) Öncelikle temel güvenlik/optimalite setini hazırla
+    KAZAN ← KazanmaHamlesi(tahta, benim)           // varsa direkt seçeriz
+    ENGEL ← KazanmaHamlesi(tahta, rakip)           // yoksa bunu kapatırız
+    FORK  ← ForkHamlesi(tahta, benim)
+    A_FORK← ForkHamlesi(tahta, rakip)
+    MC    ← Merkez(tahta)
+    KK    ← KarsiKose(tahta, rakip)
+    BK    ← BosKose(tahta)
+    BN    ← BosKenar(tahta)
+
+    // 1) “Kesin kazan/engel” adımları olasılıksız, deterministik:
+    Eğer KAZAN ≠ YOK ise Oyna(KAZAN); DÖN
+    Eğer ENGEL ≠ YOK ise Oyna(ENGEL); DÖN
+
+    // 2) Ayna-strateji (mirroring) algıla
+    ayna ← RakipAynaYapiyorMu(tahta, benim, rakip) // simetrik yanıt paterni
+    // Örn: ilk hamleni köşeye yaptıysan, rakip karşı köşe; merkezse, rakip köşe; 
+    // reflektif dönüşümlerde sürekli simetri korunuyorsa TRUE.
+
+    // 3) Aday hamle havuzu oluştur (öncelik → ağırlık)
+    adaylar ← ∅
+
+    Eğer FORK ≠ YOK ise
+        adaylar ← adaylar ∪ {(FORK, ağırlık=1.0, etiket="fork")}
+    Eğer A_FORK ≠ YOK ise
+        // Anti-fork: merkez veya uygun kenar/köşe
+        h2 ← EnIyiAntiForkHamlesi(tahta, benim, rakip)
+        Eğer h2 ≠ YOK ise adaylar ← adaylar ∪ {(h2, 0.95, "anti-fork")}
+
+    Eğer MC boş ise
+        adaylar ← adaylar ∪ {(MC, 0.90, "merkez")}
+
+    Eğer KK ≠ YOK ise
+        adaylar ← adaylar ∪ {(KK, 0.80, "karsi-kose")}
+
+    Eğer BK ≠ YOK ise
+        adaylar ← adaylar ∪ {(BK, 0.70, "kose")}
+
+    Eğer BN ≠ YOK ise
+        adaylar ← adaylar ∪ {(BN, 0.50, "kenar")}
+
+    // 4) Güvenlik filtresi: “hemen kaybettiren” hamleleri at
+    guvenliAdaylar ← ∅
+    Her (h, w, tag) ∈ adaylar için
+        Eğer HemenKaybettirirMi(tahta, h, benim, rakip) = FALSE ise
+            guvenliAdaylar ← guvenliAdaylar ∪ {(h, w, tag)}
+
+    Eğer guvenliAdaylar boş ise
+        // son çare: herhangi bir boş ve hemen kaybettirmeyen hücre
+        Her h ∈ BosHucreler(tahta) için
+            Eğer HemenKaybettirirMi(tahta, h, benim, rakip) = FALSE ise
+                Oyna(h); DÖN
+        // hiçbiri yoksa mecburen bir boş hücre
+        Oyna(Rastgele(BosHucreler(tahta))); DÖN
+
+    // 5) Ayna-stratejiyi kır (simetri kırma): 
+    // ayna = TRUE ise, p_kir olasılıkla “alışılmış en iyi” yerine aynı skorlu başka bir tip seç
+    Eğer ayna = TRUE ve RastgeleOlasilik() < p_kir ise
+        // simetri kırıcı seçenekler:
+        // - rakip köşe odaklıysa kenar tercih et
+        // - rakip merkezle baskı kuruyorsa köşe tercih et
+        // - aynı kategoride birden çok hücre varsa farklı eksende olanı seç
+        simetriKiranlar ← SimetriKiranAdaylariFiltrele(guvenliAdaylar, tahta, rakip)
+        Eğer simetriKiranlar boş değilse
+            secim ← OranliSec(simetriKiranlar)  // ağırlıklı seçim
+            Oyna(secim.h); DÖN
+        // değilse normal akışa devam
+
+    // 6) ε-greedy (tahmin edilmezlik): küçük bir olasılıkla en iyi olmayan güvenli hamleyi seç
+    Eğer RastgeleOlasilik() < eps ise
+        altOpt ← AltOptimalGuvenli(guvenliAdaylar)  // ağırlığı nispeten düşük olanlardan biri
+        Eğer altOpt ≠ YOK ise Oyna(altOpt.h); DÖN
+
+    // 7) Ağırlıklı seçim (softmax veya normalize edilmiş ağırlıklarla)
+    secim ← OranliSec(guvenliAdaylar)  // örn. w'leri normalize edip rastgele
+    Oyna(secim.h); DÖN
