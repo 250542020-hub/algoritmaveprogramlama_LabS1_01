@@ -1,4 +1,101 @@
-Öğrenci No:
-AD-SOYAD:
+Öğrenci No:250542020
+AD-SOYAD:Ahmet Enes Altun
 
 Lütfen seçtiğiniz algoritmaya ait çözümü ve diğer isterleri aşağıya ekleyiniz:
+ALGORİTMA IdealKahveDemle_PourOver(fincan=1)
+    BAŞLA
+
+    // 0) Sabitler
+    kahve_bir_fincan ← 12           // gram
+    oran ← 15                        // su:kahve (1:15)
+    hedef_sıcaklık ← 93              // °C
+    öğütme ← "orta-ince"
+    hedef_süre_alt ← 180             // sn
+    hedef_süre_üst ← 210             // sn
+    akış_hızı ← 5                    // g/sn (yaklaşık)
+    bloom_çarpan ← 2.5               // bloom suyu = 2.5 × kahve
+    kademe_yüzdeleri ← [0.60, 0.85, 1.00]   // toplam su hedefleri
+    min_çekilme_bekleme ← 5          // sn
+
+    // 1) Miktarları hesapla
+    kahve ← fincan * kahve_bir_fincan            // gram
+    su_toplam ← kahve * oran                      // gram
+    bloom_su ← yuvarla(kahve * bloom_çarpan)     // gram
+    hedef1 ← yuvarla(su_toplam * kademe_yüzdeleri[0])
+    hedef2 ← yuvarla(su_toplam * kademe_yüzdeleri[1])
+    hedef3 ← su_toplam
+
+    // 2) Ekipmanı hazırla (dripper, kağıt filtre, sunucu/fincan, kettle, terazi, kronometre)
+    ekipmanı_masaya_diz
+    teraziyi_aç
+    kettle’a temiz su doldur
+    kahveyi değirmen ile "öğütme" seviyesinde "kahve" gram öğüt
+    suyu kaynat
+    kaynayan suyu 20–30 sn beklet; yaklaşık "hedef_sıcaklık" dereceye düşür
+
+    // 3) Filtreyi yıka ve ön ısıt
+    dripper’a kağıt filtreyi yerleştir
+    teraziyi sıfırla
+    dripper’ı sunucu/fincanın üstüne koy
+    filtreyi 150–200 g sıcak su ile tamamen ıslat (kağıt tadını al; ekipmanı ısıt)
+    sunucuda biriken suyu dök
+    sunucuyu/fincanı tekrar yerine koy ve teraziyi sıfırla
+
+    // 4) Kahveyi koy ve yatağı düzle
+    öğütülmüş kahveyi filtreye dök; yüzeyi hafif sallayarak düzle
+    teraziyi sıfırla
+    kronometreyi hazırla
+
+    // 5) Bloom (ön ıslatma ve gaz çıkışı)
+    kronometreyi başlat
+    hedef_miktar ← bloom_su
+    döküş_süresi ← hedef_miktar / akış_hızı
+    merkezden düşük yükseklikle hedef_miktarı yavaşça dök (döküş süresi ≈ döküş_süresi)
+    kahve yatağını çok hafifçe bir kez karıştır veya kısa çalkala
+    30–45 sn bekle
+
+    // 6) Ana döküş 1 (toplam suyu hedef1’e çıkar)
+    mevcut_toplam ← bloom_su
+    hedef ← hedef1
+    dökülecek ← hedef - mevcut_toplam
+    döküş_süresi ← dökülecek / akış_hızı
+    dairesel küçük hareketlerle "dökülecek" suyu dök (≈ döküş_süresi)
+    kahve yatağını bir kez çok hafif çalkala
+    15–20 sn bekle
+    mevcut_toplam ← hedef
+
+    // 7) Ana döküş 2 (toplam suyu hedef2’ye çıkar)
+    hedef ← hedef2
+    dökülecek ← hedef - mevcut_toplam
+    döküş_süresi ← dökülecek / akış_hızı
+    dairesel küçük hareketlerle "dökülecek" suyu dök (≈ döküş_süresi)
+    kahve yatağını bir kez çok hafif çalkala
+    15–20 sn bekle
+    mevcut_toplam ← hedef
+
+    // 8) Ana döküş 3 (toplam suyu hedef3 = su_toplam’a çıkar)
+    hedef ← hedef3
+    dökülecek ← hedef - mevcut_toplam
+    döküş_süresi ← dökülecek / akış_hızı
+    dairesel küçük hareketlerle "dökülecek" suyu dök (≈ döküş_süresi)
+    döküşü bitir
+    su akışını ve kahve yatağının çökmesini gözle
+
+    // 9) Süzülme (drawdown)
+    filtreden su tamamen süzülene kadar bekle
+    "min_çekilme_bekleme" saniye daha bekle
+
+    // 10) Süre kontrolü ve ayar notu
+    toplam_süre ← kronometre değerini oku
+    eğer toplam_süre < hedef_süre_alt ise not_et: "Çok hızlı → bir sonraki demlemede öğütmeyi biraz daha İNCE yapma; akışı sakinleştir veya öğütmeyi çok AZ incele."
+    eğer toplam_süre > hedef_süre_üst ise not_et: "Çok yavaş → bir sonraki demlemede öğütmeyi biraz KALINLAŞTIR."
+    tat_dengesini not et: ekşi ise öğütmeyi incele / acı-buruk ise kalınlaştır; gövde azsa oranı 1:14, yoğun ise 1:16 deneyebilirsin
+
+    // 11) Servis ve temizlik
+    sunucuyu hafifçe çevirerek karışımı homojenleştir
+    kahveyi fincana dök
+    iç ve tadım notlarını kaydet (oran, sıcaklık, öğütme, toplam süre)
+    filtre ve posayı çıkarıp at
+    dripper ve sunucuyu durula, kurut, ekipmanı kaldır
+
+    BİTİR
