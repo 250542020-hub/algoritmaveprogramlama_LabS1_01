@@ -1,4 +1,57 @@
-Öğrenci No:
-AD-SOYAD:
+Öğrenci No:250542020
+AD-SOYAD:Ahmet Enes Altun
 
 Lütfen seçtiğiniz algoritmaya ait çözümü ve diğer isterleri aşağıya ekleyiniz:
+ALGORİTMA EnKisaSuredeUniversiteyeGit
+    BAŞLA
+    
+    // Hedef belirlenir
+    Yazdır("Hedef: Üniversiteye gitmek")
+
+    // Gerekli koşullar belirlenir
+    Gereksinimler ← ["Lise diploması", "YKS sınavına girmek", "Yeterli puan almak", "Tercih yapmak", "Kayıt olmak"]
+
+    // Hazırlık aşaması
+    Eğer "Lise diploması" yoksa
+        Yazdır("Liseyi bitir.")
+        LiseyiBitir()
+    Son
+
+    // Sınava hazırlık
+    Yazdır("YKS sınavına hazırlanılıyor...")
+    DersCalis("Matematik")
+    DersCalis("Türkçe")
+    DersCalis("Fen")
+    DersCalis("Sosyal")
+
+    // Sınava gir
+    Sonuc ← YKSSinavinaGir()
+
+    // Puan kontrolü
+    Eğer Sonuc ≥ HedefPuan ise
+        Yazdır("Yeterli puan alındı!")
+        TercihYap()
+    Aksi halde
+        Yazdır("Puan hedefin altında.")
+        Yazdır("Alternatif üniversite ve bölümler aranıyor...")
+
+        Alternatifler ← AlternatifUniversiteleriBul(Sonuc)
+
+        Eğer Alternatifler boş değilse
+            Yazdır("Uygun olabilecek üniversiteler:")
+            Listele(Alternatifler)
+            Secim ← KullaniciSecimi(Alternatifler)
+            Yazdır("Seçilen alternatif: " + Secim)
+            KayıtOl(Secim)
+        Aksi halde
+            Yazdır("Uygun alternatif bulunamadı, istersen seneye tekrar hazırlanabilirsin.")
+        Son
+    Son
+
+    // Kayıt süreci (başarılı sonuç)
+    Eğer KayıtTamamlandi ise
+        Yazdır("Tebrikler! Üniversiteye gittin 🎉")
+    Son
+
+    BİTİR
+
