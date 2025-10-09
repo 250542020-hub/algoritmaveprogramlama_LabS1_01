@@ -1,4 +1,93 @@
-Öğrenci No:
-AD-SOYAD:
+Öğrenci No:250542020
+AD-SOYAD:Ahmet Enes Altun
 
 Lütfen seçtiğiniz algoritmaya ait çözümü ve diğer isterleri aşağıya ekleyiniz:
+ALGORİTMA RehberiAlfabetikSirala
+    BAŞLA
+
+    // 1. Alfabe tanımı (Türkçe harfler + özel karakterler)
+    ALFABE ← ["!", "#", "$", "%", "&", "(", ")", "*", "+", ",", "-", ".", "/", "0","1","2","3","4","5","6","7","8","9",
+               ":", ";", "<", "=", ">", "?", "@",
+               "a","b","c","ç","d","e","f","g","ğ","h","ı","i","j","k","l","m","n","o","ö","p","r","s","ş","t","u","ü","v","y","z",
+               "[", "\\", "]", "^", "_", "`", "{", "|", "}", "~", " "]
+
+    // 2. Rehber verisi
+    Rehber ← [
+        {Ad: "Ahmet", Soyad: "Çelik", Numara: "555-111-2233"},
+        {Ad: "Ayşe!", Soyad: "Arslan", Numara: "555.444.5566"},
+        {Ad: "Mehmet", Soyad: "Ünal", Numara: "555_222_3344"},
+        {Ad: "Ali", Soyad: "Aydın-Can", Numara: "5551113344"},
+        ...
+    ]
+
+    // 3. Yardımcı fonksiyon: karakter karşılaştır
+    FONKSIYON HarfKarsilastir(h1, h2)
+        h1 ← KüçükHarfYap_TR(h1)
+        h2 ← KüçükHarfYap_TR(h2)
+        Eğer h1 = h2 ise DÖN 0
+        Eğer h1 ∈ ALFABE değilse i1 ← +∞
+        Aksi halde i1 ← ALFABE içinde h1’in indeksi
+        Eğer h2 ∈ ALFABE değilse i2 ← +∞
+        Aksi halde i2 ← ALFABE içinde h2’nin indeksi
+        Eğer i1 < i2 ise DÖN -1
+        Eğer i1 > i2 ise DÖN  1
+        DÖN 0
+    SON
+
+    // 4. Yardımcı fonksiyon: metin karşılaştır
+    FONKSIYON MetinKarsilastir(m1, m2)
+        m1 ← KüçükHarfYap_TR(m1)
+        m2 ← KüçükHarfYap_TR(m2)
+        i ← 0
+        While i < min(uzunluk(m1), uzunluk(m2))
+            Sonuc ← HarfKarsilastir(m1[i], m2[i])
+            Eğer Sonuc ≠ 0 ise DÖN Sonuc
+            i ← i + 1
+        Eğer uzunluk(m1) < uzunluk(m2) ise DÖN -1
+        Eğer uzunluk(m1) > uzunluk(m2) ise DÖN  1
+        DÖN 0
+    SON
+
+    // 5. Kişi karşılaştır
+    FONKSIYON KisiKarsilastir(k1, k2)
+        Sonuc ← MetinKarsilastir(k1.Soyad, k2.Soyad)
+        Eğer Sonuc ≠ 0 ise DÖN Sonuc
+        Sonuc ← MetinKarsilastir(k1.Ad, k2.Ad)
+        Eğer Sonuc ≠ 0 ise DÖN Sonuc
+        DÖN MetinKarsilastir(k1.Numara, k2.Numara)
+    SON
+
+    // 6. Kararlı sıralama (birleştirme sıralaması)
+    FONKSIYON Birleştir(sol, sağ)
+        i ← 0; j ← 0; çıktı ← []
+        While i < uzunluk(sol) ve j < uzunluk(sağ)
+            Eğer KisiKarsilastir(sol[i], sağ[j]) ≤ 0 ise
+                Ekle(çıktı, sol[i]); i ← i + 1
+            Aksi
+                Ekle(çıktı, sağ[j]); j ← j + 1
+        While i < uzunluk(sol)
+            Ekle(çıktı, sol[i]); i ← i + 1
+        While j < uzunluk(sağ)
+            Ekle(çıktı, sağ[j]); j ← j + 1
+        DÖN çıktı
+    SON
+
+    FONKSIYON Sirala(Rehber)
+        Eğer uzunluk(Rehber) ≤ 1 ise DÖN Rehber
+        orta ← uzunluk(Rehber) // 2
+        sol ← Rehber[0..orta-1]
+        sağ ← Rehber[orta..son]
+        sol ← Sirala(sol)
+        sağ ← Sirala(sağ)
+        DÖN Birleştir(sol, sağ)
+    SON
+
+    // 7. Sıralamayı uygula
+    SiraliRehber ← Sirala(Rehber)
+
+    // 8. Sonucu yazdır
+    Yazdır("Alfabetik olarak sıralanmış telefon rehberi:")
+    Her kişi ∈ SiraliRehber için
+        Yazdır(kişi.Soyad + " " + kişi.Ad + " - " + kişi.Numara)
+
+    BİTİR
