@@ -1,4 +1,115 @@
-Öğrenci No:
-AD-SOYAD:
+Öğrenci No:250542020
+AD-SOYAD:Ahmet Enes Altun
 
 Lütfen seçtiğiniz algoritmaya ait çözümü ve diğer isterleri aşağıya ekleyiniz:
+ALGORİTMA AdilPastaDagit(N, Kişiler, Pasta)
+    BAŞLA
+    Eğer N = 2 ise
+        KES_VE_SEC_2(Kişiler[0], Kişiler[1], Pasta)
+        DÖN Paylar
+
+    Eğer N = 3 ise
+        SELFRIDGE_CONWAY_3(Kişiler, Pasta)
+        DÖN Paylar
+
+    // N ≥ 4
+    BRAMS_TAYLOR_N(Kişiler, Pasta)
+    DÖN Paylar
+    BİTİR
+
+
+// ---------- N = 2: Kes ve Seç ----------
+PROSEDÜR KES_VE_SEC_2(A, B, Pasta)
+    // A pastayı kendi ölçüsüne göre iki eşit parçaya böler
+    (P1, P2) ← A.Kes(Pasta, hedef1=1/2, hedef2=1/2)
+    // B daha değerli gördüğünü seçer
+    secim ← B.Sec({P1, P2})
+    AtaPay(B, secim)
+    AtaPay(A, Diğeri({P1, P2}, secim))
+
+
+// ---------- N = 3: Selfridge–Conway ----------
+PROSEDÜR SELFRIDGE_CONWAY_3([A,B,C], Pasta)
+    // 1) A, pastayı kendi gözünde eşit 3 parçaya böler
+    (X, Y, Z) ← A.Kes3(Pasta)  // A'ya göre X~Y~Z
+
+    // 2) B, en büyük bulduğu parçayı (varsa) 2. büyükle eşitlemek için TRIM yapar
+    enbuyuk ← B.EnBuyuk({X,Y,Z})
+    diger1, diger2 ← KalanIkisi({X,Y,Z}, enbuyuk)
+    // B, 'enbuyuk' parçasını kendi gözünde 2. büyükle eşit olana kadar kırpar:
+    (enbuyuk_kirp, trim) ← B.Kirpar(enbuyuk, hedef= B.Deger(diger1) ile eşit)
+
+    // 3) C, AŞAĞIDAKİ SIRAYLA SEÇER: {enbuyuk_kirp, diger1, diger2}
+    //   (kural: C, kirpılmış olanı alırsa trim'i sonraki turlarda çözmek için rezerve edilir)
+    C_parca ← C.Sec({enbuyuk_kirp, diger1, diger2})
+
+    // 4) B, kalan iki parçadan seçer; A son kalanı alır
+    B_parca ← B.Sec(Kalanlar({enbuyuk_kirp, diger1, diger2}, C_parca))
+    A_parca ← SonKalan({enbuyuk_kirp, diger1, diger2}, C_parca, B_parca)
+
+    // 5) Eğer C, kirpılmış parçayı aldıysa: TRIM artığı (trim) A ve B arasında "kes-ve-seç" ile pay edilir.
+    Eğer C_parca = enbuyuk_kirp ise
+        // TRIM’i A ve B adilce böl
+        KES_VE_SEC_2(A, B, trim)
+    Aksi halde
+        // B kirpılmışı aldıysa: TRIM’i A ve C arasında kes-ve-seç yap
+        Eğer B_parca = enbuyuk_kirp ise
+            KES_VE_SEC_2(A, C, trim)
+        Değilse
+            // Kirpılmışı A aldıysa: TRIM’i B ve C arasında kes-ve-seç yap
+            KES_VE_SEC_2(B, C, trim)
+
+    // Çıktı: A_parca (+ varsa trim payı), B_parca (+ varsa trim payı), C_parca
+
+
+// ---------- N ≥ 4: Brams–Taylor Tarzı Kıskançlıksız Şema ----------
+PROSEDÜR BRAMS_TAYLOR_N(Kişiler, Pasta)
+    // Fikir: Tekrarlı turlarda parçalar eşitlenir, fazla görülenler TRIM’lenir,
+    // itirazlar tutulur, rezerv parçalar “emanet” edilir; rol permütasyonu ile
+    // kıskançlıklar çözülerek herkes payına kavuşur.
+
+    K ← Kişiler
+    Kalan ← Pasta
+    ItirazTablosu ← ∅          // kim hangi parçayı fazla buldu
+    RezerveParcalar ← ∅        // trimlenmiş artıklar
+
+    // Turlar N’den 2’ye inene kadar
+    WHILE |K| > 2 DO
+        // 1) Bir "Kesici" seç: K[0] (rol her turda döner)
+        Kesici ← SiraylaSec(K)
+        // Kesici kendi ölçüsüne göre |K| eşit değerli parçaya böler
+        D ← Kesici.KesEsiParcalar(Kalan, adet=|K|)
+
+        // 2) Diğer kişiler sırayla değerlendirir; fazla bulduklarını  "TRIM" ile
+        // kendi gözlerinde eşitleyene kadar küçültür (kirpıntılar RezerveParcalar’a)
+        FOR p ∈ K \ {Kesici} DO
+            hedef ← p.EnBuyuk(D)
+            eğer p.Deger(hedef) > p.Deger(EnIyiEş(D \ {hedef})) ise
+                (hedef_kirp, trim) ← p.Kirpar(hedef, hedefDeger = p.Deger(EnIyiEş(D \ {hedef})))
+                D ← (D \ {hedef}) ∪ {hedef_kirp}
+                RezerveParcalar ← RezerveParcalar ∪ {trim}
+                ItirazTablosu ← ItirazTablosu ∪ {(p, hedef_kirp)}
+            SON
+        SON FOR
+
+        // 3) "İtiraz önceliğiyle seçim": Trim’leyenler önce seçer
+        SecimSirasi ← TrimleyenlerOnce(ItirazTablosu, K)  // sonra kalanlar
+        Atamalar ← SıralıSeçim(SecimSirasi, D)             // herkes bir dilim seçer
+
+        // 4) Bu turda payını alanları K’dan çıkar; Kalan pastayı güncelle
+        Alanlar ← Atamalar.Kisiler
+        K ← K \ Alanlar
+        Kalan ← Kalan \ Birlesim(Atamalar.Parcalar)
+
+        // 5) Rezerve (trim artıkları) daha sonra, ilgili taraflar arasında “kes-ve-seç”
+        // alt prosedürleriyle dağıtılmak üzere tutulur (envy-free korunur).
+        // (Uygun eşleşmeler tur sonunda belirlenir)
+        RezerveEslestirVeDagit(RezerveParcalar)
+
+        // 6) İtiraz tablosu yeni tura sıfırlanır
+        ItirazTablosu ← ∅
+    END WHILE
+
+    // Son iki kişi kaldıysa aralarında kes-ve-seç yap
+    Eğer |K| = 2 ise
+        KES_VE_SEC_2(K[0], K[1], Kalan)
